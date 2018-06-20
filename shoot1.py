@@ -1,8 +1,8 @@
 from tkinter import *
 import random
 
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 1000
+HEIGHT = 700
 X_CHAR = WIDTH // 2
 Y_CHAR = HEIGHT // 2
 BULL_SPEED = 2
@@ -17,10 +17,8 @@ P_S = 0
 
 
 def draw():
-    x = random.choice((random.randrange(0, abs(X_CHAR - CHAR_SIZE) + 1),
-                       random.randrange(X_CHAR + CHAR_SIZE, abs(WIDTH - CHAR_SIZE) + 1)))
-    y = random.choice((random.randrange(0, abs(Y_CHAR - CHAR_SIZE) + 1),
-                       random.randrange(Y_CHAR + CHAR_SIZE, abs(HEIGHT - CHAR_SIZE // 2) + 1)))
+    x = random.randint(0, WIDTH - CHAR_SIZE)
+    y = random.randint(0, HEIGHT - CHAR_SIZE)
     return c.create_oval(x, y, x + CHAR_SIZE, y + CHAR_SIZE, fill=random.choice(('orange', 'yellow', 'purple')))
 
 
