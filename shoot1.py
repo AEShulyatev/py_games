@@ -4,12 +4,14 @@ WIDTH = 800
 HEIGHT = 600
 X_CHAR = WIDTH//2
 Y_CHAR = WIDTH//2
-BULL_SPEED = 41
+BULL_SPEED = 2
 IN_GAME = True
 CHAR_SIZE = 40
-BULL_SIZE_1 = 10
-BULL_SIZE_2 = 5
+BULL_SIZE_1 = 8
+BULL_SIZE_2 = 4
 bullets = dict()
+sum_1, sum_2 = 0, 0
+pr_1, pr_2 = '00', '00'
 
 
 def draw():
@@ -22,17 +24,39 @@ def draw():
 
 def movement(self):
     print(c.coords(self))
+    global sum_1, sum_2, pr_1, pr_2
     x1, y1, x2, y2 = c.coords(self)
-    if y1 == Y_CHAR:
+    if (Y_CHAR + CHAR_SIZE) >= y1 >= Y_CHAR:
         posx, posy = (x1-15) if X_CHAR <= x1 else (x2+15), y1 + CHAR_SIZE//2
         bullets[c.create_oval(posx, posy, posx + BULL_SIZE_1, posy + BULL_SIZE_2, fill='red')] = 0 if x1 >= X_CHAR else 2
-    elif x1 == X_CHAR:
+    elif (X_CHAR + CHAR_SIZE) >= x1 >= X_CHAR:
         posx, posy = x1 + CHAR_SIZE//2, (y1-15) if Y_CHAR <= y1 else (y2+15)
         bullets[c.create_oval(posx, posy, posx + BULL_SIZE_2, posy + BULL_SIZE_1, fill='red')] = 1 if y1 <= Y_CHAR else 3
-    if random.choice((0, 1)):
-        c.move(self, random.choice((1, -1))*CHAR_SIZE, 0)
+    rand_1 = random.choice((0, 1))
+    rand_2 = random.choice((1, -1))
+    num = enemies.index(self)
+    if (sum_1 if num == 0 else sum_2) == 80:
+        if rand_1:
+            c.move(self, rand_2, 0)
+        else:
+            c.move(self, 0, rand_2)
+        if num == 0:
+            sum_1 = 1
+            pr_1 = str(rand_1) + ('0' if rand_2 == -1 else '1')
+        else:
+            sum_2 = 1
+            pr_2 = str(rand_1) + ('0' if rand_2 == -1 else '1')
     else:
-        c.move(self, 0, random.choice((1, -1))*CHAR_SIZE)
+        pr = pr_1 if num == 0 else pr_2
+        rand_1, rand_2 = int(pr[0]), (-1 if pr[1] == '0' else 1)
+        if rand_1:
+            c.move(self, rand_2, 0)
+        else:
+            c.move(self, 0, rand_2)
+        if num == 0:
+            sum_1 += 1
+        else:
+            sum_2 += 1
     if c.coords(self)[3] <= 0:
         c.coords(self, x1, HEIGHT - CHAR_SIZE, x2, HEIGHT)
     if c.coords(self)[1] >= HEIGHT:
@@ -94,7 +118,7 @@ def main():
     for bull in del_b:
         bullets.pop(bull)
         c.delete(bull)
-    root.after(200, main)
+    root.after(10, main)
 
 
 c.grid()
