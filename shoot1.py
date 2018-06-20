@@ -4,7 +4,7 @@ WIDTH = 800
 HEIGHT = 600
 X_CHAR = WIDTH//2
 Y_CHAR = WIDTH//2
-BULL_SPEED = 5
+BULL_SPEED = 41
 IN_GAME = True
 CHAR_SIZE = 40
 BULL_SIZE_1 = 10
@@ -24,33 +24,31 @@ def movement(self):
     print(c.coords(self))
     x1, y1, x2, y2 = c.coords(self)
     if y1 == Y_CHAR:
-        posx, posy = x1 if X_CHAR <= x1 else x2, y1
+        posx, posy = (x1-15) if X_CHAR <= x1 else (x2+15), y1 + CHAR_SIZE//2
         bullets[c.create_oval(posx, posy, posx + BULL_SIZE_1, posy + BULL_SIZE_2, fill='red')] = 0 if x1 >= X_CHAR else 2
     elif x1 == X_CHAR:
-        posx, posy = x1, y1 if Y_CHAR <= y1 else y2
+        posx, posy = x1 + CHAR_SIZE//2, (y1-15) if Y_CHAR <= y1 else (y2+15)
         bullets[c.create_oval(posx, posy, posx + BULL_SIZE_2, posy + BULL_SIZE_1, fill='red')] = 1 if y1 <= Y_CHAR else 3
-    if random.choice((1, 0)):
+    if random.choice((0, 1)):
         c.move(self, random.choice((1, -1))*CHAR_SIZE, 0)
     else:
         c.move(self, 0, random.choice((1, -1))*CHAR_SIZE)
-    if c.coords(self)[3] < 0:
-        c.move(self, 0, -c.coords(self)[1])
-    if c.coords(self)[1] > HEIGHT:
-        c.move(self, 0, HEIGHT - c.coords(self)[3])
-    if c.coords(self)[2] < 0:
-        c.move(self, 0, -c.coords(self)[0]*2)
-    if c.coords(self)[0] > WIDTH:
-        c.move(self, 0, WIDTH - c.coords(self)[2])
+    if c.coords(self)[3] <= 0:
+        c.coords(self, x1, HEIGHT - CHAR_SIZE, x2, HEIGHT)
+    if c.coords(self)[1] >= HEIGHT:
+        c.coords(self, x1, 0, x2, CHAR_SIZE)
+    if c.coords(self)[2] <= 0:
+        c.coords(self, WIDTH-CHAR_SIZE, y1, WIDTH, y2)
+    if c.coords(self)[0] >= WIDTH:
+        c.coords(self, 0, y1, CHAR_SIZE, y2)
 
 
 def checker(self):
-    global BULL_SPEED
     l, t, r, b = c.coords(self)
     for bull in bullets:
         lb, tb, rb, bb = c.coords(bull)
         if (lb <= l <= rb and tb <= t <= bb) or (lb <= r <= rb and tb <= b <= bb) or (lb <= r <= rb and tb <= t <= bb) or (lb <= l <= rb and tb <= b <= bb):
             del_bull = bull
-            BULL_SPEED += 1
             a = draw()
             enemies.append(a)
             break
@@ -96,7 +94,7 @@ def main():
     for bull in del_b:
         bullets.pop(bull)
         c.delete(bull)
-    root.after(100, main)
+    root.after(200, main)
 
 
 c.grid()
