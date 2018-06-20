@@ -1,11 +1,13 @@
+# Вы играете за чёрный квадрат. Круги - ваши враги. Управление: WASD, стрелять - стрелочки.
+# Если вы выйдите за границы поля, то появитесь на другой стороне, но стрелять сможете только вернувшись обратно (баг).
 from tkinter import *
 import random
 
-WIDTH = 1000
-HEIGHT = 700
+WIDTH = 1200
+HEIGHT = 600
 X_CHAR = WIDTH // 2
 Y_CHAR = HEIGHT // 2
-BULL_SPEED = 2
+BULL_SPEED = 4
 CHAR_SIZE = 40
 BULL_SIZE_1 = 8
 BULL_SIZE_2 = 4
@@ -73,11 +75,21 @@ def checker(self):
         c.coords(self, 0, y1, CHAR_SIZE, y2)
     for bull in bullets:
         lb, tb, rb, bb = c.coords(bull)
-        if (lb <= l <= rb and tb <= t <= bb) or (lb <= r <= rb and tb <= b <= bb) or (
-                lb <= r <= rb and tb <= t <= bb) or (lb <= l <= rb and tb <= b <= bb):
+        if bullets[bull] % 2 == 0:
+            s1x, s1y = lb, tb + BULL_SIZE_2 // 2
+            s3x, s3y = rb, tb + BULL_SIZE_2 // 2
+            s2x, s2y = lb + BULL_SIZE_1 // 2, tb
+            s4x, s4y = rb + BULL_SIZE_1 // 2, bb
+        else:
+            s1x, s1y = lb, tb + BULL_SIZE_1 // 2
+            s3x, s3y = rb, tb + BULL_SIZE_1 // 2
+            s2x, s2y = lb + BULL_SIZE_2 // 2, tb
+            s4x, s4y = rb + BULL_SIZE_2 // 2, bb
+        if (l <= s1x <= r and t <= s1y <= b) or (l <= s2x <= r and t <= s2y <= b) or (
+                l <= s3x <= r and t <= s3y <= b) or (l <= s4x <= r and t <= s4y <= b):
             del_bull = bull
             enemies.append(draw())
-            enemies.pop(0 if enemies[0] == self else 1)
+            enemies.pop(enemies.index(self))
             c.delete(self)
             break
     try:
@@ -108,8 +120,10 @@ root = Tk()
 root.title('Game')
 c = Canvas(root, width=WIDTH, height=HEIGHT, bg='blue')
 character = c.create_rectangle(X_CHAR, Y_CHAR, X_CHAR + CHAR_SIZE, Y_CHAR + CHAR_SIZE, fill='black')
-print(c.coords(character))
-enemies = [draw(), draw()]
+n = 3  # кол-во врагов
+enemies = list()
+for _ in range(n):
+    enemies.append(draw())
 text = c.create_text(WIDTH / 2, HEIGHT / 8,
                      text=P_S,
                      font="Arial 20",
@@ -117,14 +131,13 @@ text = c.create_text(WIDTH / 2, HEIGHT / 8,
 
 
 def main():
-    movement(enemies[0])
-    movement(enemies[1])
-    checker(enemies[0])
-    checker(enemies[1])
+    for i in range(n):
+        movement(enemies[i])
+    for i in range(n):
+        checker(enemies[i])
     try:
         checker(character)
     except:
-        c.itemconfig(text, text=P_S - 1)
         c.create_text(WIDTH / 2, HEIGHT / 2,
                       text="GAME OVER!",
                       font="Arial 20",
@@ -138,8 +151,6 @@ def main():
         c.delete(bull)
     root.after(10, main)
 
-
-# Напишем функцию обработки нажатия клавиш
 
 c.grid()
 c.focus_set()
@@ -160,16 +171,18 @@ def movement_handler(event):
         c.move(character, SPEED_CHAR, 0)
         X_CHAR += SPEED_CHAR
     elif event.keysym == "Up":
-        bullets[c.create_oval(X_CHAR + CHAR_SIZE // 2, Y_CHAR - 11, X_CHAR + CHAR_SIZE // 2 + BULL_SIZE_2,
-                              Y_CHAR - 11 + BULL_SIZE_1, fill='green')] = 3
+        bullets[c.create_oval(X_CHAR + CHAR_SIZE // 2, Y_CHAR - 11 - CHAR_SIZE, X_CHAR + CHAR_SIZE // 2 + BULL_SIZE_2,
+                              Y_CHAR - 11 - CHAR_SIZE + BULL_SIZE_1, fill='green')] = 3
     elif event.keysym == "Down":
-        bullets[c.create_oval(X_CHAR + CHAR_SIZE // 2, Y_CHAR + CHAR_SIZE + 11, X_CHAR + CHAR_SIZE // 2 + BULL_SIZE_2,
-                              Y_CHAR + CHAR_SIZE + 11 + BULL_SIZE_1, fill='green')] = 1
+        bullets[
+            c.create_oval(X_CHAR + CHAR_SIZE // 2, Y_CHAR + CHAR_SIZE * 2 + 11, X_CHAR + CHAR_SIZE // 2 + BULL_SIZE_2,
+                          Y_CHAR + CHAR_SIZE * 2 + 11 + BULL_SIZE_1, fill='green')] = 1
     elif event.keysym == "Left":
-        bullets[c.create_oval(X_CHAR - 11, Y_CHAR + CHAR_SIZE // 2, X_CHAR - 11 + BULL_SIZE_1,
+        bullets[c.create_oval(X_CHAR - 11 - CHAR_SIZE, Y_CHAR + CHAR_SIZE // 2, X_CHAR - 11 - CHAR_SIZE + BULL_SIZE_1,
                               Y_CHAR + CHAR_SIZE // 2 + BULL_SIZE_2, fill='green')] = 0
     elif event.keysym == "Right":
-        bullets[c.create_oval(X_CHAR + CHAR_SIZE + 11, Y_CHAR + CHAR_SIZE // 2, X_CHAR + CHAR_SIZE + 11 + BULL_SIZE_1,
+        bullets[c.create_oval(X_CHAR + 2 * CHAR_SIZE + 11, Y_CHAR + CHAR_SIZE // 2,
+                              X_CHAR + 2 * CHAR_SIZE + 11 + BULL_SIZE_1,
                               Y_CHAR + CHAR_SIZE // 2 + BULL_SIZE_2, fill='green')] = 2
 
 
