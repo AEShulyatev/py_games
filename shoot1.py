@@ -1,5 +1,4 @@
 # Вы играете за чёрный квадрат. Круги - ваши враги. Управление: WASD, стрелять - стрелочки.
-# Если вы выйдите за границы поля, то появитесь на другой стороне, но стрелять сможете только вернувшись обратно (баг).
 from tkinter import *
 import random
 
@@ -12,58 +11,92 @@ CHAR_SIZE = 40
 BULL_SIZE_1 = 8
 BULL_SIZE_2 = 4
 bullets = dict()
+no_shoots = dict()
+k = 7  # между выстрелами проходит минимум k шагов
 SPEED_CHAR = 32
-sum_1, sum_2 = 0, 0
-pr_1, pr_2 = '00', '00'
+n = 3  # кол-во врагов
+sum = [0] * n
+prev = ['00'] * n
 P_S = 0
 
 
 def draw():
-    x = random.randint(0, WIDTH - CHAR_SIZE)
-    y = random.randint(0, HEIGHT - CHAR_SIZE)
+    try:
+        x1 = random.randint(X_CHAR + CHAR_SIZE * 7, WIDTH - CHAR_SIZE)
+    except:
+        pass
+    try:
+        x2 = random.randint(0, X_CHAR - CHAR_SIZE * 6)
+    except:
+        pass
+    try:
+        x = random.choice((x1, x2))
+    except:
+        try:
+            x = x1
+        except:
+            x = x2
+
+    try:
+        y1 = random.randint(Y_CHAR + CHAR_SIZE * 7, HEIGHT - CHAR_SIZE)
+    except:
+        pass
+    try:
+        y2 = random.randint(0, Y_CHAR - CHAR_SIZE * 6)
+    except:
+        pass
+    try:
+        y = random.choice((y1, y2))
+    except:
+        try:
+            y = y1
+        except:
+            y = y2
     return c.create_oval(x, y, x + CHAR_SIZE, y + CHAR_SIZE, fill=random.choice(('orange', 'yellow', 'purple')))
 
 
 def movement(self):
     global sum_1, sum_2, pr_1, pr_2
     x1, y1, x2, y2 = c.coords(self)
-    if (Y_CHAR + CHAR_SIZE) >= y1 >= Y_CHAR:
-        posx, posy = (x1 - 15) if X_CHAR <= x1 else (x2 + 15), y1 + CHAR_SIZE // 2
-        bullets[
-            c.create_oval(posx, posy, posx + BULL_SIZE_1, posy + BULL_SIZE_2, fill='red')] = 0 if x1 >= X_CHAR else 2
-    elif (X_CHAR + CHAR_SIZE) >= x1 >= X_CHAR:
-        posx, posy = x1 + CHAR_SIZE // 2, (y1 - 15) if Y_CHAR <= y1 else (y2 + 15)
-        bullets[
-            c.create_oval(posx, posy, posx + BULL_SIZE_2, posy + BULL_SIZE_1, fill='red')] = 1 if y1 <= Y_CHAR else 3
+    if no_shoots[self] >= k:
+        if (Y_CHAR + CHAR_SIZE) >= y1 >= Y_CHAR:
+            posx, posy = (x1 - 15) if X_CHAR <= x1 else (x2 + 15), y1 + CHAR_SIZE // 2
+            bullets[
+                c.create_oval(posx, posy, posx + BULL_SIZE_1, posy + BULL_SIZE_2,
+                              fill='red')] = 0 if x1 >= X_CHAR else 2
+            no_shoots[self] = 0
+        elif (X_CHAR + CHAR_SIZE) >= x1 >= X_CHAR:
+            posx, posy = x1 + CHAR_SIZE // 2, (y1 - 15) if Y_CHAR <= y1 else (y2 + 15)
+            bullets[
+                c.create_oval(posx, posy, posx + BULL_SIZE_2, posy + BULL_SIZE_1,
+                              fill='red')] = 1 if y1 <= Y_CHAR else 3
+            no_shoots[self] = 0
+        else:
+            no_shoots[self] += 1
+    else:
+        no_shoots[self] += 1
     rand_1 = random.choice((0, 1))
     rand_2 = random.choice((1, -1))
     num = enemies.index(self)
-    if (sum_1 if num == 0 else sum_2) == 80:
+    if sum[num] == 80:
         if rand_1:
             c.move(self, rand_2, 0)
         else:
             c.move(self, 0, rand_2)
-        if num == 0:
-            sum_1 = 1
-            pr_1 = str(rand_1) + ('0' if rand_2 == -1 else '1')
-        else:
-            sum_2 = 1
-            pr_2 = str(rand_1) + ('0' if rand_2 == -1 else '1')
+        sum[num] = 1
+        prev[num] = str(rand_1) + ('0' if rand_2 == -1 else '1')
     else:
-        pr = pr_1 if num == 0 else pr_2
+        pr = prev[num]
         rand_1, rand_2 = int(pr[0]), (-1 if pr[1] == '0' else 1)
         if rand_1:
             c.move(self, rand_2, 0)
         else:
             c.move(self, 0, rand_2)
-        if num == 0:
-            sum_1 += 1
-        else:
-            sum_2 += 1
+        sum[num] += 1
 
 
 def checker(self):
-    global P_S
+    global P_S, X_CHAR, Y_CHAR
     l, t, r, b = x1, y1, x2, y2 = c.coords(self)
     if c.coords(self)[3] <= 0:
         c.coords(self, x1, HEIGHT - CHAR_SIZE, x2, HEIGHT)
@@ -73,6 +106,7 @@ def checker(self):
         c.coords(self, WIDTH - CHAR_SIZE, y1, WIDTH, y2)
     if c.coords(self)[0] >= WIDTH:
         c.coords(self, 0, y1, CHAR_SIZE, y2)
+    X_CHAR, Y_CHAR, _1, _2 = c.coords(character)
     for bull in bullets:
         lb, tb, rb, bb = c.coords(bull)
         if bullets[bull] % 2 == 0:
@@ -88,8 +122,11 @@ def checker(self):
         if (l <= s1x <= r and t <= s1y <= b) or (l <= s2x <= r and t <= s2y <= b) or (
                 l <= s3x <= r and t <= s3y <= b) or (l <= s4x <= r and t <= s4y <= b):
             del_bull = bull
-            enemies.append(draw())
+            en = draw()
+            enemies.append(en)
+            no_shoots[en] = 0
             enemies.pop(enemies.index(self))
+            no_shoots.pop(self)
             c.delete(self)
             break
     try:
@@ -120,10 +157,11 @@ root = Tk()
 root.title('Game')
 c = Canvas(root, width=WIDTH, height=HEIGHT, bg='blue')
 character = c.create_rectangle(X_CHAR, Y_CHAR, X_CHAR + CHAR_SIZE, Y_CHAR + CHAR_SIZE, fill='black')
-n = 3  # кол-во врагов
 enemies = list()
 for _ in range(n):
-    enemies.append(draw())
+    en = draw()
+    enemies.append(en)
+    no_shoots[en] = 0
 text = c.create_text(WIDTH / 2, HEIGHT / 8,
                      text=P_S,
                      font="Arial 20",
