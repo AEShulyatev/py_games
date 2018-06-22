@@ -12,6 +12,8 @@ Y_CHAR = HEIGHT // 2
 CHAR_SIZE = 50
 BULL_SIZE_1 = 12
 BULL_SIZE_2 = 6
+EN_SPEED = 1
+BULL_SPEED = 4
 bullets = dict()
 no_shoots = dict()
 k = 7  # между выстрелами проходит минимум k шагов
@@ -20,12 +22,12 @@ P_S = 0
 n = 3
 sum = [0] * n
 prev = ['00'] * n
+enemies = list()
 
 
 class Window(QWidget):
     def __init__(self):
         super().__init__()
-        self.EN_SPEED, self.BULL_SPEED = 1, 4
         self.text = QLabel('Enemies and bullets move much slower.\n '
                            'The only potential danger is to catch up with your projectile.')
         self.initUI(self.text)
@@ -95,7 +97,7 @@ class Window(QWidget):
 
     def play(self):
         try:
-            the_main(EN_SPEED, BULL_SPEED)
+            the_main()
         except:
             self.textfield.setText('Ууупс... Что-то пошло не так.')
 
@@ -111,7 +113,9 @@ class Window(QWidget):
             event.ignore()
 
 
-def the_main(EN_SPEED, BULL_SPEED):
+def the_main():
+    global enemies
+
     def draw():
         try:
             x1 = random.randint(X_CHAR + CHAR_SIZE * 7, WIDTH - CHAR_SIZE)
@@ -188,7 +192,7 @@ def the_main(EN_SPEED, BULL_SPEED):
             sum[num] += 1
 
     def checker(self):
-        global P_S, X_CHAR, Y_CHAR
+        global P_S, X_CHAR, Y_CHAR, enemies, no_shoots, bullets, sum, prev
         l, t, r, b = x1, y1, x2, y2 = c.coords(self)
         if c.coords(self)[3] <= 0:
             c.coords(self, x1, HEIGHT - CHAR_SIZE, x2, HEIGHT)
@@ -217,9 +221,25 @@ def the_main(EN_SPEED, BULL_SPEED):
                 en = draw()
                 enemies.append(en)
                 no_shoots[en] = 0
-                enemies.pop(enemies.index(self))
-                no_shoots.pop(self)
-                c.delete(self)
+                if self in enemies:
+                    enemies.pop(enemies.index(self))
+                    no_shoots.pop(self)
+                    c.delete(self)
+                else:
+                    c.delete(character)
+                    c.create_text(WIDTH / 2, HEIGHT / 2,
+                                  text="GAME OVER!",
+                                  font="Arial 20",
+                                  fill="red")
+                    P_S = 0
+                    enemies = list()
+                    no_shoots = dict()
+                    bullets = dict()
+                    X_CHAR = WIDTH // 2
+                    Y_CHAR = HEIGHT // 2
+                    sum = [0] * n
+                    prev = ['00'] * n
+                    return 0
                 break
         try:
             bullets.pop(del_bull)
@@ -228,6 +248,7 @@ def the_main(EN_SPEED, BULL_SPEED):
             c.itemconfig(text, text=P_S)
         except:
             pass
+        return 1
 
     def movement_bull(bull):
         if bullets[bull] == 0:
@@ -247,7 +268,7 @@ def the_main(EN_SPEED, BULL_SPEED):
     root.title('Game')
     c = Canvas(root, width=WIDTH, height=HEIGHT, bg='blue')
     character = c.create_rectangle(X_CHAR, Y_CHAR, X_CHAR + CHAR_SIZE, Y_CHAR + CHAR_SIZE, fill='black')
-    enemies = list()
+
     for _ in range(n):
         en = draw()
         enemies.append(en)
@@ -258,20 +279,15 @@ def the_main(EN_SPEED, BULL_SPEED):
                          fill="white")
 
     def main():
-        global P_S
+        global P_S, X_CHAR, Y_CHAR, sum, prev
         for i in range(n):
             movement(enemies[i])
         for i in range(n):
             checker(enemies[i])
-        try:
-            checker(character)
-        except:
-            c.itemconfig(text, text=P_S - 1)
-            c.create_text(WIDTH / 2, HEIGHT / 2,
-                          text="GAME OVER!",
-                          font="Arial 20",
-                          fill="red")
-            P_S = 0
+        bool_ = checker(character)
+        if not bool_:
+            c.unbind("<KeyPress>")
+            return 0
         del_b = list()
         for bull in bullets:
             del_b.extend(movement_bull(bull))
@@ -317,6 +333,7 @@ def the_main(EN_SPEED, BULL_SPEED):
 
     c.bind("<KeyPress>", movement_handler)
     main()
+
     root.mainloop()
 
 
