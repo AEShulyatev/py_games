@@ -42,7 +42,7 @@ class Window(QWidget):
         self.button5 = QPushButton('Nightmare!', self)
         self.button6 = QPushButton('Play!', self)
         self.textfield = QLineEdit(self)
-        self.textfield.setToolTip('Количество врагов')
+        self.textfield.setToolTip('Number of enemies')
         self.grid = QGridLayout(self)
         self.grid.addWidget(self.text_main, 1, 1, 1, 2)
         self.grid.addWidget(self.button1, 2, 1)
@@ -96,10 +96,12 @@ class Window(QWidget):
         self.text.setText('Enemies and bullets\n move faster than you!')
 
     def play(self):
+        global P_S
+        P_S = 0
         try:
             the_main(int(self.textfield.text()))
         except:
-            self.textfield.setText('Ууупс... Что-то пошло не так.')
+            self.textfield.setText('Uuups.. Something went wrong!')
 
     def closeEvent(self, event):
 
