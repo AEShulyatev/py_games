@@ -1,9 +1,9 @@
-# Вы играете за чёрный квадрат. Круги - ваши враги. Управление: WASD, стрелять - стрелочки.
+# Вы играете за квадрат. Круги - ваши враги. Управление: WASD, стрелять - стрелочки.
 from tkinter import *
 import random
-from PyQt5.QtWidgets import (QApplication, QLineEdit, QPushButton,
-                             QGridLayout, QWidget, QToolTip, QMessageBox, QLabel)
-from PyQt5.QtGui import (QIcon, QFont)
+from PyQt5.QtWidgets import (QApplication, QLineEdit, QPushButton, QColorDialog,
+                             QGridLayout, QWidget, QToolTip, QMessageBox, QLabel, QFrame)
+from PyQt5.QtGui import (QIcon, QFont, QColor)
 
 WIDTH = 1800
 HEIGHT = 900
@@ -19,10 +19,10 @@ no_shoots = dict()
 k = 7  # между выстрелами проходит минимум k шагов
 SPEED_CHAR = 32
 P_S = 0
-n = 3
 sum = list()
 prev = list()
 enemies = list()
+col = QColor(0, 0, 0)
 
 
 class Window(QWidget):
@@ -41,8 +41,14 @@ class Window(QWidget):
         self.button4 = QPushButton('Ultra-Violence.', self)
         self.button5 = QPushButton('Nightmare!', self)
         self.button6 = QPushButton('Play!', self)
+        self.text_2 = QLabel('Choose number of enemies:')
         self.textfield = QLineEdit(self)
-        self.textfield.setToolTip('Number of enemies')
+        self.btn = QPushButton('Dialog', self)
+        self.frm = QFrame(self)
+        self.frm.setStyleSheet("QWidget { background-color: %s }"
+                               % col.name())
+        self.text_3 = QLabel('Choose color of your character:')
+        self.frm.setGeometry(130, 22, 100, 100)
         self.grid = QGridLayout(self)
         self.grid.addWidget(self.text_main, 1, 1, 1, 2)
         self.grid.addWidget(self.button1, 2, 1)
@@ -50,9 +56,13 @@ class Window(QWidget):
         self.grid.addWidget(self.button3, 4, 1)
         self.grid.addWidget(self.button4, 5, 1)
         self.grid.addWidget(self.button5, 6, 1)
-        self.grid.addWidget(self.button6, 8, 1, 8, 2)
-        self.grid.addWidget(self.textfield, 7, 1)
+        self.grid.addWidget(self.button6, 11, 1, 11, 2)
+        self.grid.addWidget(self.text_2, 7, 1)
+        self.grid.addWidget(self.textfield, 8, 1)
         self.grid.addWidget(text, 2, 2, 7, 2)
+        self.grid.addWidget(self.btn, 10, 1)
+        self.grid.addWidget(self.text_3, 9, 1)
+        self.grid.addWidget(self.frm, 10, 2)
         self.setLayout(self.grid)
         self.button1.clicked.connect(self.easy)
         self.button2.clicked.connect(self.normal)
@@ -60,9 +70,17 @@ class Window(QWidget):
         self.button4.clicked.connect(self.extreme)
         self.button5.clicked.connect(self.nightmare)
         self.button6.clicked.connect(self.play)
+        self.btn.clicked.connect(self.showDialog)
         self.setGeometry(300, 300, 300, 200)
         self.setWindowTitle('Game')
         self.show()
+
+    def showDialog(self):
+        global col
+        col = QColorDialog.getColor()
+        if col.isValid():
+            self.frm.setStyleSheet("QWidget { background-color: %s }"
+                                   % col.name())
 
     def easy(self):
         global EN_SPEED, BULL_SPEED
@@ -264,7 +282,7 @@ def the_main(n):
     root = Tk()
     root.title('Game')
     c = Canvas(root, width=WIDTH, height=HEIGHT, bg='blue')
-    character = c.create_rectangle(X_CHAR, Y_CHAR, X_CHAR + CHAR_SIZE, Y_CHAR + CHAR_SIZE, fill='black')
+    character = c.create_rectangle(X_CHAR, Y_CHAR, X_CHAR + CHAR_SIZE, Y_CHAR + CHAR_SIZE, fill=col.name())
     sum = [0] * n
     prev = ['00'] * n
     enemies = list()
