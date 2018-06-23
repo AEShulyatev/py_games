@@ -20,8 +20,8 @@ k = 7  # между выстрелами проходит минимум k ша�
 SPEED_CHAR = 32
 P_S = 0
 n = 3
-sum = [0] * n
-prev = ['00'] * n
+sum = list()
+prev = list()
 enemies = list()
 
 
@@ -97,7 +97,7 @@ class Window(QWidget):
 
     def play(self):
         try:
-            the_main()
+            the_main(int(self.textfield.text()))
         except:
             self.textfield.setText('Ууупс... Что-то пошло не так.')
 
@@ -113,8 +113,8 @@ class Window(QWidget):
             event.ignore()
 
 
-def the_main():
-    global enemies
+def the_main(n):
+    global enemies, sum, prev, no_shoots, bullets
 
     def draw():
         try:
@@ -232,13 +232,8 @@ def the_main():
                                   font="Arial 20",
                                   fill="red")
                     P_S = 0
-                    enemies = list()
-                    no_shoots = dict()
-                    bullets = dict()
                     X_CHAR = WIDTH // 2
                     Y_CHAR = HEIGHT // 2
-                    sum = [0] * n
-                    prev = ['00'] * n
                     return 0
                 break
         try:
@@ -268,7 +263,11 @@ def the_main():
     root.title('Game')
     c = Canvas(root, width=WIDTH, height=HEIGHT, bg='blue')
     character = c.create_rectangle(X_CHAR, Y_CHAR, X_CHAR + CHAR_SIZE, Y_CHAR + CHAR_SIZE, fill='black')
-
+    sum = [0] * n
+    prev = ['00'] * n
+    enemies = list()
+    no_shoots = dict()
+    bullets = dict()
     for _ in range(n):
         en = draw()
         enemies.append(en)
@@ -333,7 +332,6 @@ def the_main():
 
     c.bind("<KeyPress>", movement_handler)
     main()
-
     root.mainloop()
 
 
