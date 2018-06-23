@@ -1,4 +1,4 @@
-# Вы играете за квадрат. Круги - ваши враги. Управление: WASD, стрелять - стрелочки.
+# Вы играете за чёрный квадрат. Круги - ваши враги. Управление: WASD, стрелять - стрелочки.
 from tkinter import *
 import random
 from PyQt5.QtWidgets import (QApplication, QLineEdit, QPushButton, QColorDialog,
@@ -43,7 +43,7 @@ class Window(QWidget):
         self.button6 = QPushButton('Play!', self)
         self.text_2 = QLabel('Choose number of enemies:')
         self.textfield = QLineEdit(self)
-        self.btn = QPushButton('Dialog', self)
+        self.btn = QPushButton('Choose!', self)
         self.frm = QFrame(self)
         self.frm.setStyleSheet("QWidget { background-color: %s }"
                                % col.name())
