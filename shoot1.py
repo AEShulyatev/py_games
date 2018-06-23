@@ -1,4 +1,3 @@
-# Вы играете за чёрный квадрат. Круги - ваши враги. Управление: WASD, стрелять - стрелочки.
 from tkinter import *
 import random
 from PyQt5.QtWidgets import (QApplication, QLineEdit, QPushButton, QColorDialog,
