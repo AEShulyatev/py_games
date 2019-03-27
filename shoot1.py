@@ -29,10 +29,6 @@ class Window(QWidget):
         super().__init__()
         self.text = QLabel('Enemies and bullets move much slower.\n '
                            'The only potential danger is to catch up with your projectile.')
-        self.initUI(self.text)
-
-    def initUI(self, text):
-        QToolTip.setFont(QFont('SansSerif', 10))
         self.text_main = QLabel('Choose Skill Level:', self)
         self.button1 = QPushButton('I`m too young to die.', self)
         self.button2 = QPushButton('Hey, not too rough.', self)
@@ -44,11 +40,15 @@ class Window(QWidget):
         self.textfield = QLineEdit(self)
         self.btn = QPushButton('Choose!', self)
         self.frm = QFrame(self)
+        self.text_3 = QLabel('Choose color of your character:')
+        self.grid = QGridLayout(self)
+        self.initUI(self.text)
+
+    def initUI(self, text):
+        QToolTip.setFont(QFont('SansSerif', 10))
         self.frm.setStyleSheet("QWidget { background-color: %s }"
                                % col.name())
-        self.text_3 = QLabel('Choose color of your character:')
         self.frm.setGeometry(130, 22, 100, 100)
-        self.grid = QGridLayout(self)
         self.grid.addWidget(self.text_main, 1, 1, 1, 2)
         self.grid.addWidget(self.button1, 2, 1)
         self.grid.addWidget(self.button2, 3, 1)
@@ -176,13 +176,13 @@ def the_main(n):
         x1, y1, x2, y2 = c.coords(self)
         if no_shoots[self] >= k:
             if (Y_CHAR + CHAR_SIZE) >= y1 >= Y_CHAR:
-                posx, posy = (x1 - 20) if X_CHAR <= x1 else (x2 + 20), y1 + CHAR_SIZE // 2
+                posx, posy = (x1 - 20) if X_CHAR <= x1 else (x1 + 20), y1 + CHAR_SIZE // 2
                 bullets[
                     c.create_oval(posx, posy, posx + BULL_SIZE_1, posy + BULL_SIZE_2,
                                   fill='red')] = 0 if x1 >= X_CHAR else 2
                 no_shoots[self] = 0
             elif (X_CHAR + CHAR_SIZE) >= x1 >= X_CHAR:
-                posx, posy = x1 + CHAR_SIZE // 2, (y1 - 20) if Y_CHAR <= y1 else (y2 + 20)
+                posx, posy = x1 + CHAR_SIZE // 2, (y1 - 20) if Y_CHAR <= y1 else (y1 + 20)
                 bullets[
                     c.create_oval(posx, posy, posx + BULL_SIZE_2, posy + BULL_SIZE_1,
                                   fill='red')] = 1 if y1 <= Y_CHAR else 3
@@ -359,3 +359,4 @@ if __name__ == '__main__':
     app.setWindowIcon(QIcon(""))
     window = Window()
     sys.exit(app.exec())
+
